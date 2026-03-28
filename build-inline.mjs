@@ -25,7 +25,7 @@ try {
 }
 
 console.log('Building project...');
-execSync('tsc && vite build', { stdio: 'inherit' });
+execSync('npx tsc && npx vite build', { stdio: 'inherit' });
 
 console.log('Inlining CSS and JS into HTML...');
 
