@@ -1,7 +1,0 @@
-GET /profile/github/pull HTTP/1.1
-Accept-Encoding: deflate, gzip
-Host: api.morp.hackclub.com
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhMTFmNWE1MS1jMzk0LTQ2Y2UtOTM4Yi0yODA3ZjFlMTYwZWUiLCJ1c2VybmFtZSI6ImJhaWxleV9taWxlcyIsImRpc3BsYXlOYW1lIjoiQW50aS1CYWlsZXkiLCJwcm9maWxlUGljdHVyZVVybCI6Imh0dHBzOi8vYXZhdGFycy5zbGFjay1lZGdlLmNvbS8yMDI1LTEwLTA3Lzk2MzQ5OTg4ODQ2NjNfNWVkNmNhNjM2MTJlMTI3MDBjNTNfMTkyLnBuZyIsInNsYWNrSWQiOiJVMDkyNktNQ1ZESiIsImlhdCI6MTc3NDYzNDk1NCwiZXhwIjoxNzc1MjM5NzU0fQ.pwO4dhQmobjQaxL4JnOJdW4I-9O47Zimkr5Fdh3mUK8
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0
-Accept: */*
-Priority: u=0
