@@ -1,12 +1,3 @@
-/* 
-
-AUTO GENERATED USING CHATGPT
-
-*/
-
-
-
-
 import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
@@ -14,15 +5,6 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distDir = path.join(__dirname, 'dist');
-
-// Switch to main branch first
-console.log('Switching to main branch...');
-try {
-  execSync('git checkout main', { stdio: 'inherit' });
-} catch (error) {
-  console.error('✗ Failed to switch to main branch');
-  process.exit(1);
-}
 
 console.log('Building project...');
 execSync('npx tsc && npx vite build', { stdio: 'inherit' });
@@ -54,3 +36,27 @@ html = html.replace(jsRegex, (match, src) => {
   }
   return match;
 });
+
+// Write the inlined HTML back
+fs.writeFileSync(htmlPath, html);
+
+// Delete the separate asset files
+const assetsDir = path.join(distDir, 'assets');
+if (fs.existsSync(assetsDir)) {
+  fs.rmSync(assetsDir, { recursive: true, force: true });
+  console.log('✓ Removed separate asset files');
+}
+
+console.log('✓ Single HTML file built successfully!');
+console.log(`Output: ${htmlPath}`);
+
+// Deploy to main branch using gh-pages
+console.log('\nDeploying to main branch with gh-pages...');
+try {
+  execSync('npx gh-pages -d dist -b main', { stdio: 'inherit' });
+  console.log('✓ Deployment to main branch completed successfully!');
+} catch (error) {
+  console.error('✗ Failed to deploy with gh-pages');
+  console.error(error.message);
+  process.exit(1);
+}
