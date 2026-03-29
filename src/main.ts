@@ -28,8 +28,10 @@ class gameData {
     this.data = data
     console.log(data)
 
+    if (this.data === null) {return}
 
     this.initialised = true
+    scoreCounter.innerHTML = String(this.data.score)
    }
 
    save(data: Record<string, number> | boolean) {
@@ -46,8 +48,11 @@ class gameData {
    }
 }
 
-const hamburgerIcon: Element = document.getElementById("hamburger") as HTMLDivElement
+const hamburgerIcon: HTMLElement = document.getElementById("hamburger") as HTMLDivElement
 let gameState: gameData
+const scoreCounter: HTMLElement = document.getElementById("score-counter") as HTMLParagraphElement
+const scoreAdder: HTMLElement = document.getElementById("score-add") as HTMLParagraphElement
+let scoreAdderTimeout: null | number
 
 hamburgerIcon.addEventListener("click", () => {
     console.log("Clicked hamburger")
@@ -60,8 +65,25 @@ document.addEventListener("click", () => {
   if (gameState.data === null) {return}
 
   gameState.data.score += 1
+  const clickSound: HTMLAudioElement = new Audio("https://www.myinstants.com/media/sounds/pisseim-mund-online-audio-converter.mp3")
+  clickSound.play()
+  clickSound.addEventListener("ended", () => {
+    //Causes an error in the console but fuck if I care
+    clickSound.pause()
+    clickSound.remove()
+  })
   console.log("clicked, +1 score, new score: " + gameState.data.score)
+  scoreCounter.innerHTML = String(gameState.data.score)
   gameState.save(false)
+
+  scoreAdder.style.display = "block"
+  if (scoreAdderTimeout !== null){
+    clearTimeout(scoreAdderTimeout)
+  }
+  
+  scoreAdderTimeout = setTimeout(() => {
+    scoreAdder.style.display = "none"
+  }, 200);
 })
 
 
