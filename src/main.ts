@@ -1,3 +1,6 @@
+// TODO: Fix storage perms, check ideas.txt
+
+
 const defaultSave: Record<string, number> = {
   "score" : 0,
 
@@ -54,13 +57,15 @@ let scoreCounter: HTMLElement
 let scoreAdder: HTMLElement
 let scoreAdderTimeout: null | number
 
-
-
 document.addEventListener("click", () => {
-  if (!gameState.initialised) {
+  if(!gameState) {
+    console.log("Still waiting for game to load")
     return
   }
-  if (gameState.data === null) {return}
+
+  if (!gameState.initialised || gameState.data === null) {
+    return
+  }
 
   gameState.data.score += 1
   const clickSound: HTMLAudioElement = new Audio("https://www.myinstants.com/media/sounds/pisseim-mund-online-audio-converter.mp3")
