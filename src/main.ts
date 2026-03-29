@@ -12,6 +12,15 @@ class gameData {
 
    constructor() {
     const parseData = (): Record<string, number> | null => {
+      //Temporary bypass
+
+      let loadedData: Record<string, number>
+      loadedData = structuredClone(defaultSave)
+      this.save(loadedData)
+      return loadedData
+
+      //End bypass
+      /*
       let loadedData: Record<string, number> | string | null = localStorage.getItem("saveData")
       if (loadedData === null){ //Assumably first time data load
         loadedData = structuredClone(defaultSave)
@@ -24,7 +33,7 @@ class gameData {
         return parsedData
       } else {
         return null
-      }
+      }*/
     }
     console.log("Initalised class and loading data...")
     let data: Record<string, number> | null = parseData()
@@ -90,12 +99,14 @@ document.addEventListener("click", () => {
 })
 
 
-document.addEventListener("DOMContentLoaded", () => {
-  gameState = new gameData()
+document.addEventListener("DOMContentLoaded", async () => {
   scoreAdder = document.getElementById("score-add") as HTMLParagraphElement
   scoreCounter = document.getElementById("score-counter") as HTMLParagraphElement
   hamburgerIcon = document.getElementById("hamburger") as HTMLDivElement
   hamburgerIcon.addEventListener("click", () => {
       console.log("Clicked hamburger")
   })
+
+  gameState = new gameData()
+
 })
