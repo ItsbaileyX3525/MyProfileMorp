@@ -16,7 +16,6 @@ class gameData {
 
       let loadedData: Record<string, number>
       loadedData = structuredClone(defaultSave)
-      this.save(loadedData)
       return loadedData
 
       //End bypass
@@ -47,6 +46,13 @@ class gameData {
    }
 
    save(data: Record<string, number> | boolean) {
+    // bypass
+
+    console.log("Not saving data whilst error")
+    return
+
+    // end bypass
+
     console.log("Saving game state")
     if (data) { //For first time save
       localStorage.setItem("saveData", JSON.stringify(data))
