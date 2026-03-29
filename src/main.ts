@@ -48,15 +48,13 @@ class gameData {
    }
 }
 
-const hamburgerIcon: HTMLElement = document.getElementById("hamburger") as HTMLDivElement
+let hamburgerIcon: HTMLElement
 let gameState: gameData
-const scoreCounter: HTMLElement = document.getElementById("score-counter") as HTMLParagraphElement
-const scoreAdder: HTMLElement = document.getElementById("score-add") as HTMLParagraphElement
+let scoreCounter: HTMLElement
+let scoreAdder: HTMLElement
 let scoreAdderTimeout: null | number
 
-hamburgerIcon.addEventListener("click", () => {
-    console.log("Clicked hamburger")
-})
+
 
 document.addEventListener("click", () => {
   if (!gameState.initialised) {
@@ -88,5 +86,11 @@ document.addEventListener("click", () => {
 
 
 document.addEventListener("DOMContentLoaded", () => {
-    gameState = new gameData()
+  gameState = new gameData()
+  scoreAdder = document.getElementById("score-add") as HTMLParagraphElement
+  scoreCounter = document.getElementById("score-counter") as HTMLParagraphElement
+  hamburgerIcon = document.getElementById("hamburger") as HTMLDivElement
+  hamburgerIcon.addEventListener("click", () => {
+      console.log("Clicked hamburger")
+  })
 })
