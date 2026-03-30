@@ -8,9 +8,9 @@ function uuidV4() {
   for (let i = 0; i < 36; i++) {
     uuid[i] = Math.floor(Math.random() * 16);
   }
-  uuid[14] = 4; // set bits 12-15 of time-high-and-version to 0100
-  uuid[19] = uuid[19] &= ~(1 << 2); // set bit 6 of clock-seq-and-reserved to zero
-  uuid[19] = uuid[19] |= (1 << 3); // set bit 7 of clock-seq-and-reserved to one
+  uuid[14] = 4;
+  uuid[19] = uuid[19] &= ~(1 << 2);
+  uuid[19] = uuid[19] |= (1 << 3);
   uuid[8] = uuid[13] = uuid[18] = uuid[23] = '-';
   return uuid.map((x) => x.toString(16)).join('');
 }
@@ -47,24 +47,19 @@ class gameData {
     })
 
     if (!request.ok) {
-      console.log("Request failed womp")
       return
     }
 
     const data = await request.json()
 
     if (data.success === "true") {
-      console.log("Data retrieved")
       if (data.message === "NoData") {
         let loadedData: Record<string, number>
         loadedData = structuredClone(defaultSave)
         this.data = loadedData
       } else if (data.message == "Data") {
-        //let loadedData: Record<string, number>
         this.data = structuredClone(JSON.parse(data.data))
-        console.log("new saved data: " + this.data)
         if (this.data === null) return
-        console.log("score: " + this.data.score)
       }
     } else {
       console.log("Error retrieving data")
@@ -81,7 +76,6 @@ class gameData {
    }
 
    async save() {
-    console.log("Saving game state")
     if (!this.initialised || !this.data) return
 
     const request = await fetch(hostname+":"+port + "/save", {
@@ -130,13 +124,11 @@ document.addEventListener("click", () => {
 
   gameState.data.score += 1
   const clickSound: HTMLAudioElement = new Audio("https://www.myinstants.com/media/sounds/pisseim-mund-online-audio-converter.mp3")
-  clickSound.play()
+  clickSound.play().catch(() => {}) // Stops the error in console from happening
   clickSound.addEventListener("ended", () => {
-    //Causes an error in the console but fuck if I care
     clickSound.pause()
     clickSound.remove()
   })
-  console.log("clicked, +1 score, new score: " + gameState.data.score)
   scoreCounter.innerHTML = String(gameState.data.score)
   updateCounter++
   if (updateCounter >= 5) {
@@ -169,10 +161,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   gameState = new gameData()
 
   loadDataBtn.addEventListener("click", () => {
-    if (!gameState.initialised) {
-      console.log("Please wait for game to load")
-      return
-    }
+    if (!gameState.initialised) return
     if (!saveIDInput.value) return
 
     //Attempt to update saveid
