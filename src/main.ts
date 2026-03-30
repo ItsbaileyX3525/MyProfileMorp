@@ -1,5 +1,23 @@
-// TODO: Fix storage perms, check ideas.txt
+//helper functions 
+const uuidv4Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+const gameInitalised = new CustomEvent("gameLoaded")
+
+function uuidV4() {
+  const uuid = new Array(36);
+  for (let i = 0; i < 36; i++) {
+    uuid[i] = Math.floor(Math.random() * 16);
+  }
+  uuid[14] = 4; // set bits 12-15 of time-high-and-version to 0100
+  uuid[19] = uuid[19] &= ~(1 << 2); // set bit 6 of clock-seq-and-reserved to zero
+  uuid[19] = uuid[19] |= (1 << 3); // set bit 7 of clock-seq-and-reserved to one
+  uuid[8] = uuid[13] = uuid[18] = uuid[23] = '-';
+  return uuid.map((x) => x.toString(16)).join('');
+}
+
+// TODO: Fix storage perms, check ideas.txt
+const hostname = "http://127.0.0.1"
+const port = "3000"
 
 const defaultSave: Record<string, number> = {
   "score" : 0,
@@ -7,70 +25,98 @@ const defaultSave: Record<string, number> = {
 }
 
 class gameData {
-   data: Record<string, number> | null;
-   initialised: boolean = false
+   data: Record<string, number> | null = null;
+   initialised: boolean = false;
+   saveID: string;
 
    constructor() {
-    const parseData = (): Record<string, number> | null => {
-      //Temporary bypass
+    this.saveID = uuidV4()
+    this.loadDataFromUUID()
+   }
 
-      let loadedData: Record<string, number>
-      loadedData = structuredClone(defaultSave)
-      return loadedData
+   async loadDataFromUUID(): Promise<void> {
+    console.log(this.saveID)
+    if (this.saveID === undefined || this.saveID === null) {return}
+    
+    const request = await fetch(hostname+":"+port + "/retrieve", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ saveID: this.saveID })
+    })
 
-      //End bypass
-      /*
-      let loadedData: Record<string, number> | string | null = localStorage.getItem("saveData")
-      if (loadedData === null){ //Assumably first time data load
+    if (!request.ok) {
+      console.log("Request failed womp")
+      return
+    }
+
+    const data = await request.json()
+
+    if (data.success === "true") {
+      console.log("Data retrieved")
+      if (data.message === "NoData") {
+        let loadedData: Record<string, number>
         loadedData = structuredClone(defaultSave)
-        this.save(loadedData)
-        return loadedData
+        this.data = loadedData
+      } else if (data.message == "Data") {
+        //let loadedData: Record<string, number>
+        this.data = structuredClone(JSON.parse(data.data))
+        console.log("new saved data: " + this.data)
+        if (this.data === null) return
+        console.log("score: " + this.data.score)
       }
-
-      if (typeof loadedData === "string") {
-        const parsedData: Record<string, number> = JSON.parse(loadedData)
-        return parsedData
-      } else {
-        return null
-      }*/
-    }
-    console.log("Initalised class and loading data...")
-    let data: Record<string, number> | null = parseData()
-    this.data = data
-    console.log(data)
-
-    if (this.data === null) {return}
-
-    this.initialised = true
-    scoreCounter.innerHTML = String(this.data.score)
-   }
-
-   save(data: Record<string, number> | boolean) {
-    // bypass
-
-    console.log("Not saving data whilst error")
-    return
-
-    // end bypass
-
-    console.log("Saving game state")
-    if (data) { //For first time save
-      localStorage.setItem("saveData", JSON.stringify(data))
     } else {
-      localStorage.setItem("saveData", JSON.stringify(this.data))
+      console.log("Error retrieving data")
     }
+
+    if (!this.data) return
+    if (!this.initialised) {
+      this.initialised = true
+      document.dispatchEvent(gameInitalised)
+    }
+
+    scoreCounter.innerHTML = String(this.data.score)
+    if (saveHashTxt) saveHashTxt.innerText = this.saveID
    }
 
-   reloadData() {
-    console.log("Preforming data reload")
-   }
-}
+   async save() {
+    console.log("Saving game state")
+    if (!this.initialised || !this.data) return
+
+    const request = await fetch(hostname+":"+port + "/save", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ saveID: this.saveID, saveData: JSON.stringify(this.data) })
+    })
+
+    if (!request.ok) {
+      console.log("Save request failed")
+      return
+    }
+
+    const data = await request.json()
+
+    console.log(data)
+}}
 
 let hamburgerIcon: HTMLElement
 let gameState: gameData
+let saveHashTxt: HTMLSpanElement
 let scoreCounter: HTMLElement
+let loadDataBtn: HTMLElement
 let scoreAdder: HTMLElement
+let saveIDInput: HTMLInputElement
 let scoreAdderTimeout: null | number
+
+let updateCounter: number = 0
+
+document.addEventListener("gameLoaded", () => {
+  saveHashTxt = document.getElementById("save-hash") as HTMLSpanElement
+  saveHashTxt.innerText = gameState.saveID
+})
 
 document.addEventListener("click", () => {
   if(!gameState) {
@@ -92,7 +138,12 @@ document.addEventListener("click", () => {
   })
   console.log("clicked, +1 score, new score: " + gameState.data.score)
   scoreCounter.innerHTML = String(gameState.data.score)
-  gameState.save(false)
+  updateCounter++
+  if (updateCounter >= 5) {
+    gameState.save()
+    updateCounter = 0
+  }
+  
 
   scoreAdder.style.display = "block"
   if (scoreAdderTimeout !== null){
@@ -112,7 +163,25 @@ document.addEventListener("DOMContentLoaded", async () => {
   hamburgerIcon.addEventListener("click", () => {
       console.log("Clicked hamburger")
   })
+  loadDataBtn = document.getElementById("load-data-btn") as HTMLButtonElement
+  saveIDInput = document.getElementById("save-hash-input") as HTMLInputElement
 
   gameState = new gameData()
 
+  loadDataBtn.addEventListener("click", () => {
+    if (!gameState.initialised) {
+      console.log("Please wait for game to load")
+      return
+    }
+    if (!saveIDInput.value) return
+
+    //Attempt to update saveid
+    const valid = uuidv4Regex.test(saveIDInput.value)
+    if (!valid) {
+      console.log("Please enter a valid uuidv4")
+      return
+    }
+    gameState.saveID = saveIDInput.value
+    gameState.loadDataFromUUID()
+  })
 })
