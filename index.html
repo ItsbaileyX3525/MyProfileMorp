@@ -8,7 +8,7 @@
 </head>
 <body class="w-full h-screen">
   <div id=app class="flex flex-col h-full">
-    <div id="hamburger" class="absolute left-2 cursor-pointer">
+    <div id="hamburger" class="absolute left-2 top-2 z-50 cursor-pointer p-2 rounded">
       ☰
     </div>
     <div class="absolute w-full">
@@ -42,6 +42,11 @@
   <div id="load-banner" class="hidden absolute bg-gray-600 top-1/2 right-1/2 translate-x-1/2 py-12 px-4 rounded-xl">
     <input id="save-hash-input" class="text-white bg-[#1e1e1e] rounded-xl" type="text" placeholder="input save here">
     <input id="load-data-btn" class="bg-gray-400 px-5 py-0.5 ml-2 rounded-xl cursor-pointer" type="button" value="load">
+  </div>
+  <div class="hidden absolute bg-amber-600" id="purchase-tooltip">
+    <p>
+      Purchase for 200 score
+    </p>
   </div>
 </body>
 <script type="module" src="/src/main.ts"></script>

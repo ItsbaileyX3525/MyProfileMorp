@@ -18,16 +18,33 @@ function uuidV4() {
   uuid[8] = uuid[13] = uuid[18] = uuid[23] = '-';
   return uuid.map((x) => x.toString(16)).join('');
 }
+let hostname: string
+let port: string
+let pubserver = true
+if (pubserver) {
+    hostname = "https://server.baileygamesand.codes"
+    port = "443"    
+} else {
+    hostname = "http://localhost"
+    port = "3000"
+}
 
-const hostname = "https://server.baileygamesand.codes"
-const port = "443"
 
-const defaultSave: Record<string, number> = {
+const defaultSave: Record<string, number | Record<string, boolean>> = {
   "score" : 0,
+  "purchasedItems" : {
+    "hamburger" : false,
+    "interactland" : false
+  }
+}
+
+const purchasables: Record<string, number> = {
+    "hamburger" : 85,
+    "interactland" : 200
 }
 
 class gameData {
-   data: Record<string, number> | null = null;
+   data: Record<string, number | Record<string, boolean>> | null = null;
    initialised: boolean = false;
    saveID: string;
 
@@ -56,11 +73,12 @@ class gameData {
 
     if (data.success === "true") {
       if (data.message === "NoData") {
-        let loadedData: Record<string, number>
+        let loadedData: Record<string, number | Record<string, boolean>>
         loadedData = structuredClone(defaultSave)
         this.data = loadedData
       } else if (data.message == "Data") {
         this.data = structuredClone(JSON.parse(data.data))
+        console.log(this.data)
         if (this.data === null) return
       }
     } else {
@@ -96,8 +114,39 @@ class gameData {
     const data = await request.json()
 
     console.log(data)
-}}
+  }
 
+  purchase(item: string) {
+      let cost = purchasables[item]
+      if (this.data === null || typeof this.data.score !== "number") {
+        console.log("Data null or score not number")
+        return
+      }
+      const purchasedItems = this.data.purchasedItems
+      if (typeof purchasedItems !== "object" || purchasedItems === null) {
+        console.log("purchased items not object or null")
+        return
+      }
+      console.log(purchasedItems[item])
+      if (purchasedItems[item] === true) return
+      if (this.data.score >= cost) {
+        console.log("purchased")
+        this.data.score -= cost
+        purchasedItems[item] = true
+        purchaseSFX.play()
+        this.save()
+        scoreCounter.innerHTML = String(this.data.score)
+      } else {
+        buzzerSFX.play()
+      }
+  }
+}
+
+//Sounds
+const purchaseSFX = new Audio("https://www.myinstants.com/media/sounds/ding-sound-effect_2.mp3")
+const buzzerSFX = new Audio("https://www.myinstants.com/media/sounds/wrong-answer-sound-effect.mp3")
+
+//Elements
 let hamburgerIcon: HTMLElement
 let gameState: gameData
 let saveHashTxt: HTMLSpanElement
@@ -110,7 +159,7 @@ let hashBannerButton: HTMLButtonElement
 let loadHashBanner: HTMLElement
 let loadHashBannerButton: HTMLButtonElement
 let scoreAdderTimeout: null | number
-
+let tooltip: HTMLElement
 let updateCounter: number = 0
 
 document.addEventListener("gameLoaded", () => {
@@ -128,7 +177,7 @@ document.addEventListener("click", () => {
     return
   }
 
-  gameState.data.score += 1
+  if (typeof gameState.data.score === "number") gameState.data.score += 1
   let rng = getRandomInt(1000)
   let clickLink = "https://www.myinstants.com/media/sounds/pisseim-mund-online-audio-converter.mp3"
   if (rng >= 990) {
@@ -157,13 +206,35 @@ document.addEventListener("click", () => {
   }, 200);
 })
 
+function showTooltip(item: string, price: number) {
+  tooltip.style.display = "block"
+  tooltip.innerText = `Buy ${item} for ${price} clicks`
+}
+
+function hideTooltip() {
+  tooltip.style.display = "none"
+  tooltip.innerText = ``
+}
 
 document.addEventListener("DOMContentLoaded", async () => {
   scoreAdder = document.getElementById("score-add") as HTMLParagraphElement
   scoreCounter = document.getElementById("score-counter") as HTMLParagraphElement
   hamburgerIcon = document.getElementById("hamburger") as HTMLDivElement
   hamburgerIcon.addEventListener("click", () => {
-      console.log("Clicked hamburger")
+    gameState.purchase("hamburger")
+  })
+  hamburgerIcon.addEventListener("mouseover", () => {
+    if (gameState.data === null) return
+    const purchasedItems = gameState.data.purchasedItems
+    if (typeof purchasedItems !== "object" || purchasedItems === null) {
+      console.log("purchased items not object or null")
+      return
+    }
+    if (purchasedItems["hamburger"] === true) return
+    showTooltip("hamburger", purchasables["hamburger"])
+  })
+  hamburgerIcon.addEventListener("mouseout", () => {
+    hideTooltip()
   })
   loadDataBtn = document.getElementById("load-data-btn") as HTMLButtonElement
   saveIDInput = document.getElementById("save-hash-input") as HTMLInputElement
@@ -171,6 +242,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   hashBannerButton = document.getElementById("show-save") as HTMLButtonElement
   loadHashBanner = document.getElementById("load-banner") as HTMLDivElement
   loadHashBannerButton = document.getElementById("show-load") as HTMLButtonElement
+  tooltip = document.getElementById("purchase-tooltip") as HTMLDivElement;
+
+  document.body.onpointermove = event => {
+      const { clientX, clientY } = event;
+
+      tooltip.animate({
+          left: `${clientX+5}px`,
+          top: `${clientY-20}px`
+      
+      }, {duration: 700, fill: "forwards"})
+
+  }
 
   gameState = new gameData()
 
