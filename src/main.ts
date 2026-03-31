@@ -21,7 +21,6 @@ const port = "3000"
 
 const defaultSave: Record<string, number> = {
   "score" : 0,
-
 }
 
 class gameData {
@@ -103,6 +102,10 @@ let scoreCounter: HTMLElement
 let loadDataBtn: HTMLElement
 let scoreAdder: HTMLElement
 let saveIDInput: HTMLInputElement
+let hashBanner: HTMLElement
+let hashBannerButton: HTMLButtonElement
+let loadHashBanner: HTMLElement
+let loadHashBannerButton: HTMLButtonElement
 let scoreAdderTimeout: null | number
 
 let updateCounter: number = 0
@@ -136,7 +139,6 @@ document.addEventListener("click", () => {
     updateCounter = 0
   }
   
-
   scoreAdder.style.display = "block"
   if (scoreAdderTimeout !== null){
     clearTimeout(scoreAdderTimeout)
@@ -157,9 +159,33 @@ document.addEventListener("DOMContentLoaded", async () => {
   })
   loadDataBtn = document.getElementById("load-data-btn") as HTMLButtonElement
   saveIDInput = document.getElementById("save-hash-input") as HTMLInputElement
+  hashBanner = document.getElementById("hash-banner") as HTMLDivElement
+  hashBannerButton = document.getElementById("show-save") as HTMLButtonElement
+  loadHashBanner = document.getElementById("load-banner") as HTMLDivElement
+  loadHashBannerButton = document.getElementById("show-load") as HTMLButtonElement
 
   gameState = new gameData()
 
+  hashBannerButton.addEventListener("click", () => {
+    if (hashBanner.style.display === "block") {
+        hashBanner.style.display = "none"
+        hashBannerButton.innerText = "Show save"
+    } else {
+        hashBanner.style.display = "block"
+        hashBannerButton.innerText = "Hide save"
+    }
+  })
+
+  loadHashBannerButton.addEventListener("click", () => {
+    if (loadHashBanner.style.display === "block") {
+        loadHashBanner.style.display = "none"
+        loadHashBannerButton.innerText = "Input save"
+    } else {
+        loadHashBanner.style.display = "block"
+        loadHashBannerButton.innerText = "Hide input"
+    }
+  })
+  
   loadDataBtn.addEventListener("click", () => {
     if (!gameState.initialised) return
     if (!saveIDInput.value) return

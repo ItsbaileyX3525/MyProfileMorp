@@ -32,9 +32,16 @@
       <p class="mt-4">Super interactivity?</p>
     </div>
     <div class="flex items-end flex-1">
-      <input id="save-hash-input" class="text-white bg-[#1e1e1e] rounded-xl text" type="text" placeholder="input save here"><input id="load-data-btn" class="bg-gray-400 px-5 py-0.5 ml-2 rounded-xl cursor-pointer" type="button" value="load">
-      <p class="absolute right-0">curr save hash: <span class="select-text" id="save-hash">abc-1234</span></p>
+      <button id="show-load" class="bg-gray-400 px-5 py-0.5 ml-2 rounded-xl cursor-pointer absolute left-0">Input save</button>
+      <button id="show-save" class="bg-gray-400 px-5 py-0.5 mr-2 rounded-xl cursor-pointer absolute right-0">Show save</button>
     </div>
+  </div>
+  <div id="hash-banner" class="hidden absolute bg-gray-600 top-1/2 right-1/2 translate-x-1/2 py-12 px-4 rounded-xl">
+    <p>save hash: <span class="select-text" id="save-hash">abc-1234</span></p>
+  </div>
+  <div id="load-banner" class="hidden absolute bg-gray-600 top-1/2 right-1/2 translate-x-1/2 py-12 px-4 rounded-xl">
+    <input id="save-hash-input" class="text-white bg-[#1e1e1e] rounded-xl" type="text" placeholder="input save here">
+    <input id="load-data-btn" class="bg-gray-400 px-5 py-0.5 ml-2 rounded-xl cursor-pointer" type="button" value="load">
   </div>
 </body>
 <script type="module" src="/src/main.ts"></script>
