@@ -158,6 +158,9 @@ let hashBanner: HTMLElement
 let hashBannerButton: HTMLButtonElement
 let loadHashBanner: HTMLElement
 let loadHashBannerButton: HTMLButtonElement
+let sidebar: HTMLElement
+let interactlandButton: HTMLElement
+let closeSidebar: HTMLElement
 let scoreAdderTimeout: null | number
 let tooltip: HTMLElement
 let updateCounter: number = 0
@@ -216,11 +219,33 @@ function hideTooltip() {
   tooltip.innerText = ``
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
-  scoreAdder = document.getElementById("score-add") as HTMLParagraphElement
-  scoreCounter = document.getElementById("score-counter") as HTMLParagraphElement
-  hamburgerIcon = document.getElementById("hamburger") as HTMLDivElement
+function loadInteractLand() {
+  console.log("loading interactland")
+}
+
+function loadEventListeners() {
+  closeSidebar.addEventListener("click", () => {
+    if (sidebar.style.display === "none") {
+      sidebar.style.display = "block"
+    } else {
+      sidebar.style.display = "none"
+    }
+  })
   hamburgerIcon.addEventListener("click", () => {
+    if (gameState.data === null) return
+    const purchasedItems = gameState.data.purchasedItems
+    if (typeof purchasedItems !== "object" || purchasedItems === null) {
+      console.log("purchased items not object or null")
+      return
+    }
+    if (purchasedItems["hamburger"] === true) {
+      if (sidebar.style.display === "block") {
+        sidebar.style.display = "none"
+      } else {
+        sidebar.style.display = "block"
+      }
+      return
+    }
     gameState.purchase("hamburger")
   })
   hamburgerIcon.addEventListener("mouseover", () => {
@@ -236,26 +261,32 @@ document.addEventListener("DOMContentLoaded", async () => {
   hamburgerIcon.addEventListener("mouseout", () => {
     hideTooltip()
   })
-  loadDataBtn = document.getElementById("load-data-btn") as HTMLButtonElement
-  saveIDInput = document.getElementById("save-hash-input") as HTMLInputElement
-  hashBanner = document.getElementById("hash-banner") as HTMLDivElement
-  hashBannerButton = document.getElementById("show-save") as HTMLButtonElement
-  loadHashBanner = document.getElementById("load-banner") as HTMLDivElement
-  loadHashBannerButton = document.getElementById("show-load") as HTMLButtonElement
-  tooltip = document.getElementById("purchase-tooltip") as HTMLDivElement;
 
-  document.body.onpointermove = event => {
-      const { clientX, clientY } = event;
-
-      tooltip.animate({
-          left: `${clientX+5}px`,
-          top: `${clientY-20}px`
-      
-      }, {duration: 700, fill: "forwards"})
-
-  }
-
-  gameState = new gameData()
+  interactlandButton.addEventListener("click", () => {
+    if (gameState.data === null) return
+    const purchasedItems = gameState.data.purchasedItems
+    if (typeof purchasedItems !== "object" || purchasedItems === null) {
+      console.log("purchased items not object or null")
+      return
+    }
+    if (purchasedItems["interactland"] === true) {
+      loadInteractLand()
+    }
+    gameState.purchase("interactland")
+  })
+  interactlandButton.addEventListener("mouseover", () => {
+    if (gameState.data === null) return
+    const purchasedItems = gameState.data.purchasedItems
+    if (typeof purchasedItems !== "object" || purchasedItems === null) {
+      console.log("purchased items not object or null")
+      return
+    }
+    if (purchasedItems["interactland"] === true) return
+    showTooltip("interactland", purchasables["interactland"])
+  })
+  interactlandButton.addEventListener("mouseout", () => {
+    hideTooltip()
+  })
 
   hashBannerButton.addEventListener("click", () => {
     if (hashBanner.style.display === "block") {
@@ -290,4 +321,35 @@ document.addEventListener("DOMContentLoaded", async () => {
     gameState.saveID = saveIDInput.value
     gameState.loadDataFromUUID()
   })
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  scoreAdder = document.getElementById("score-add") as HTMLParagraphElement
+  scoreCounter = document.getElementById("score-counter") as HTMLParagraphElement
+  closeSidebar = document.getElementById("close-sidebar") as HTMLParagraphElement
+  interactlandButton = document.getElementById("interactland-btn") as HTMLParagraphElement
+  hamburgerIcon = document.getElementById("hamburger") as HTMLDivElement
+  loadDataBtn = document.getElementById("load-data-btn") as HTMLButtonElement
+  saveIDInput = document.getElementById("save-hash-input") as HTMLInputElement
+  hashBanner = document.getElementById("hash-banner") as HTMLDivElement
+  hashBannerButton = document.getElementById("show-save") as HTMLButtonElement
+  loadHashBanner = document.getElementById("load-banner") as HTMLDivElement
+  loadHashBannerButton = document.getElementById("show-load") as HTMLButtonElement
+  tooltip = document.getElementById("purchase-tooltip") as HTMLDivElement;
+  sidebar = document.getElementById("sidebar") as HTMLDivElement
+
+  document.body.onpointermove = event => {
+      const { clientX, clientY } = event;
+
+      tooltip.animate({
+          left: `${clientX+5}px`,
+          top: `${clientY-20}px`
+      
+      }, {duration: 700, fill: "forwards"})
+
+  }
+
+  gameState = new gameData()
+
+  loadEventListeners()
 })
