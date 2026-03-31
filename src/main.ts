@@ -3,6 +3,10 @@ const uuidv4Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-
 
 const gameInitalised = new CustomEvent("gameLoaded")
 
+function getRandomInt(max: number): number {
+  return Math.floor(Math.random() * max) + 1;
+}
+
 function uuidV4() {
   const uuid = new Array(36);
   for (let i = 0; i < 36; i++) {
@@ -15,9 +19,8 @@ function uuidV4() {
   return uuid.map((x) => x.toString(16)).join('');
 }
 
-// TODO: Fix storage perms, check ideas.txt
-const hostname = "http://127.0.0.1"
-const port = "3000"
+const hostname = "https://server.baileygamesand.codes"
+const port = "443"
 
 const defaultSave: Record<string, number> = {
   "score" : 0,
@@ -126,7 +129,12 @@ document.addEventListener("click", () => {
   }
 
   gameState.data.score += 1
-  const clickSound: HTMLAudioElement = new Audio("https://www.myinstants.com/media/sounds/pisseim-mund-online-audio-converter.mp3")
+  let rng = getRandomInt(1000)
+  let clickLink = "https://www.myinstants.com/media/sounds/pisseim-mund-online-audio-converter.mp3"
+  if (rng >= 990) {
+    clickLink = "https://www.myinstants.com/media/sounds/city-boy-loud.mp3"
+  }
+  const clickSound: HTMLAudioElement = new Audio(clickLink)
   clickSound.play().catch(() => {}) // Stops the error in console from happening
   clickSound.addEventListener("ended", () => {
     clickSound.pause()
