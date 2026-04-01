@@ -10,7 +10,7 @@ let imgSubmit: HTMLButtonElement
 
 let hostname: string
 let port: string
-let pubserver = false
+let pubserver = true
 if (pubserver) {
     hostname = "https://server.baileygamesand.codes"
     port = "443"    
