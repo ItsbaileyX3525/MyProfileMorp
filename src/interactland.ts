@@ -7,6 +7,7 @@ let closeSidebar: HTMLParagraphElement
 let sidebar: HTMLDivElement
 let imgInput: HTMLInputElement
 let imgSubmit: HTMLButtonElement
+let interactlandEventController: AbortController | null = null
 
 let hostname: string
 let port: string
@@ -25,6 +26,13 @@ let isDragging: boolean = false
 let startX: number, startY: number
 let centerX: number = 0
 let centerY: number = 0
+
+export function disposeInteractlandView() {
+    if (interactlandEventController) {
+        interactlandEventController.abort()
+        interactlandEventController = null
+    }
+}
 
 function updateViewportCenter() {
     const rect = viewport.getBoundingClientRect()
@@ -55,13 +63,29 @@ function appendImage(imgLink: string, imgX: number, imgY: number): void {
     viewportItems.appendChild(img)
 }
 
-async function setupEventListeners() {
+function requestHomeNavigation() {
+    disposeInteractlandView()
+
+    const navigateHomeEvent = new CustomEvent("navigate-home", { cancelable: true })
+    window.dispatchEvent(navigateHomeEvent)
+
+    if (!navigateHomeEvent.defaultPrevented) {
+        window.location.href = new URL("./", window.location.href).toString()
+    }
+}
+
+function setupEventListeners() {
+    disposeInteractlandView()
+
+    interactlandEventController = new AbortController()
+    const { signal } = interactlandEventController
+
     viewport.addEventListener("mousedown", (e) => {
         isDragging = true
         viewport.style.cursor = "grabbing"
         startX = e.clientX + x
         startY = e.clientY + y
-    })
+    }, { signal })
 
     window.addEventListener("mousemove", (e) => {
         if (!isDragging) return
@@ -70,40 +94,27 @@ async function setupEventListeners() {
         y = startY - e.clientY
 
         updatePostion()
-    })
+    }, { signal })
 
     window.addEventListener("mouseup", () => {
         isDragging = false
         viewport.style.cursor = "grab"
 
         updatePostion()
-    })
+    }, { signal })
 
     window.addEventListener("resize", () => {
         updateViewportCenter()
         updatePostion()
-    })
+    }, { signal })
 
-    homeButton.addEventListener("click", async () => {
-        let htmlData: string
-
-        const request = await fetch("https://itsbaileyx3525.github.io/MyProfileMorp/")
-        
-        if(!request.ok) {
-            return
-        }
-
-        htmlData = await request.text()
-
-        console.log("loading main")
-        document.open()
-        document.write(htmlData)
-        document.close()
-    })
+    homeButton.addEventListener("click", () => {
+        requestHomeNavigation()
+    }, { signal })
 
     interactlandButton.addEventListener("click", () => {
         console.log("??? Why click this?")
-    })
+    }, { signal })
 
     closeSidebar.addEventListener("click", () => {
         if (sidebar.style.display === "none") {
@@ -111,7 +122,7 @@ async function setupEventListeners() {
         } else {
             sidebar.style.display = "none"
         }
-    })
+    }, { signal })
 
     document.addEventListener("keydown", (e) => {
         if (e.key === "Tab") {
@@ -123,7 +134,7 @@ async function setupEventListeners() {
                 sidebar.style.display = "none";
             }
         }
-    });
+    }, { signal });
 
     imgSubmit.addEventListener("click", async () => {
         const imgLink = imgInput.value
@@ -155,7 +166,7 @@ async function setupEventListeners() {
         } else {
             console.log(data)
         }
-    })
+    }, { signal })
 }
 
 async function loadImages() {
@@ -181,20 +192,53 @@ async function loadImages() {
     }
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
-    coordsText = document.getElementById("coords") as HTMLParagraphElement
-    viewport = document.getElementById("viewport") as HTMLDivElement
-    viewportItems = document.getElementById("items") as HTMLDivElement
-    homeButton  = document.getElementById("home-btn") as HTMLParagraphElement
-    interactlandButton = document.getElementById("interactland-btn") as HTMLParagraphElement
-    closeSidebar = document.getElementById("close-sidebar") as HTMLParagraphElement
-    sidebar = document.getElementById("sidebar") as HTMLDivElement
-    imgSubmit = document.getElementById("image-submit-btn") as HTMLButtonElement
-    imgInput = document.getElementById("image-input") as HTMLInputElement
+export function initialiseInteractlandView(): boolean {
+    const nextCoords = document.getElementById("coords") as HTMLParagraphElement | null
+    const nextViewport = document.getElementById("viewport") as HTMLDivElement | null
+    const nextViewportItems = document.getElementById("items") as HTMLDivElement | null
+    const nextHomeButton = document.getElementById("home-btn") as HTMLParagraphElement | null
+    const nextInteractlandButton = document.getElementById("interactland-btn") as HTMLParagraphElement | null
+    const nextCloseSidebar = document.getElementById("close-sidebar") as HTMLParagraphElement | null
+    const nextSidebar = document.getElementById("sidebar") as HTMLDivElement | null
+    const nextImgSubmit = document.getElementById("image-submit-btn") as HTMLButtonElement | null
+    const nextImgInput = document.getElementById("image-input") as HTMLInputElement | null
+
+    if (!nextCoords || !nextViewport || !nextViewportItems || !nextHomeButton || !nextInteractlandButton || !nextCloseSidebar || !nextSidebar || !nextImgSubmit || !nextImgInput) {
+        return false
+    }
+
+    coordsText = nextCoords
+    viewport = nextViewport
+    viewportItems = nextViewportItems
+    homeButton  = nextHomeButton
+    interactlandButton = nextInteractlandButton
+    closeSidebar = nextCloseSidebar
+    sidebar = nextSidebar
+    imgSubmit = nextImgSubmit
+    imgInput = nextImgInput
 
     setupEventListeners()
     updateViewportCenter()
     updatePostion();
-    loadImages()    
-})
+    loadImages()
+
+    return true
+}
+
+function autoInitialiseInteractlandView() {
+    const hasInteractlandRoot = document.getElementById("viewport") !== null
+    if (!hasInteractlandRoot) {
+        return
+    }
+
+    initialiseInteractlandView()
+}
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => {
+        autoInitialiseInteractlandView()
+    }, { once: true })
+} else {
+    autoInitialiseInteractlandView()
+}
 
