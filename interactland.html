@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactland</title>
+  <link href="/src/style.css" rel="stylesheet">
+</head>
+<body class="w-full h-full overflow-hidden m-0 p-0">
+  <div class="cursor-grab w-screen h-screen bg-[linear-gradient(to_right,#333_1px,transparent_1px),linear-gradient(to_bottom,#333_1px,transparent_1px)] bg-size-[100px_100px]" id="viewport">
+    <div id="items" class="z-10 absolute top-0 left-0 origin-top-left" style="position: absolute; top: 0; left: 0; transform-origin: top left; z-index: 10;">
+      <img src="ohnepixel-ohnebanger.gif" id="world-item" class="shrink-0 absolute min-w-32 h-32" style="position: absolute; left: 800px; top: 600px;" aria-label="World item icon">
+    </img>
+    </div>
+    <div id="center-crosshair" aria-hidden="true" style="position: fixed; left: 50%; top: 50%; width: 32px; height: 32px; transform: translate(-50%, -50%); pointer-events: none; z-index: 50;">
+      <div style="position: absolute; left: 50%; top: 0; width: 2px; height: 100%; transform: translateX(-50%); background: #ff5a36;"></div>
+      <div style="position: absolute; left: 0; top: 50%; width: 100%; height: 2px; transform: translateY(-50%); background: #ff5a36;"></div>
+      <div style="position: absolute; left: 50%; top: 50%; width: 8px; height: 8px; transform: translate(-50%, -50%); border-radius: 9999px; background: #ff5a36;"></div>
+    </div>
+  </div>
+  <div class="absolute bottom-4 right-1/2 translate-x-1/2 w-auto bg-gray-500 px-1 rounded-2xl" id="coords">Position: 23x 43y</div>
+  <div class="absolute bottom-12 right-1/2 translate-x-1/2 w-auto bg-gray-500 px-1 rounded-2xl" id="image-submit">
+    <input id="image-input" type="text" placeholder="img link"><button id="image-submit-btn" class="cursor-pointer bg-gray-600 rounded-xl px-0.5">Submit</button>
+  </div>
+  <div id="sidebar" class="bg-gray-700 z-40 absolute left-0 h-full w-auto top-0" id="side-bar">
+    <div id="items" class="text-xl flex flex-col justify-around items-center h-full">
+      <p class="cursor-pointer" id="home-btn">
+        Home
+      </p>
+      <p class="cursor-pointer" id="interactland-btn">
+        Interactland
+      </p>
+      <p class="cursor-pointer" id="close-sidebar">
+        Close
+      </p>
+    </div>
+  </div>
+</body>
+<script type="module" src="/src/interactland.ts"></script>
+</html>

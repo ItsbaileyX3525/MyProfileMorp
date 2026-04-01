@@ -219,8 +219,22 @@ function hideTooltip() {
   tooltip.innerText = ``
 }
 
-function loadInteractLand() {
+async function loadInteractLand() {
+  let htmlData: string
+
+  const request = await fetch("https://itsbaileyx3525.github.io/MyProfileMorp/interactland")
+  
+  if(!request.ok) {
+    return
+  }
+
+  htmlData = await request.text()
+
   console.log("loading interactland")
+  gameState.save()
+  document.open()
+  document.write(htmlData)
+  document.close()
 }
 
 function loadEventListeners() {
